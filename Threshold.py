@@ -12,10 +12,10 @@ def readFileInput(fileName):
         for line in file:
             inputFile.append(line.split())
     for i in inputFile:
-        Voiced.append(float(i[0]) + float(i[1]))
+        # Voiced.append(float(i[0]) + float(i[1]))
         Voiced.append(float(i[0]) - float(i[1]))
         Unvoiced.append(float(i[2]) + float(i[3]))
-        Unvoiced.append(float(i[2]) - float(i[3]))
+        # Unvoiced.append(float(i[2]) - float(i[3]))
     print(Voiced)
     print(Unvoiced)
     return Voiced, Unvoiced
@@ -26,4 +26,6 @@ stdV = np.std(Voiced)
 meanU = np.mean(Unvoiced)
 stdU = np.std(Unvoiced)
 print(f"meanV = {meanV} stdV = {stdV} meanU = {meanU} stdU = {stdU}")
+threshold = (meanV - stdV + meanU + stdU) / 2
+print(f"Ngưỡng: {threshold}")
 

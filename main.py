@@ -3,15 +3,19 @@ from scipy.io.wavfile import read
 import numpy as np
 import matplotlib.pyplot as plt
 
-FILE_PATH = 'D:\Documents\XLTHS\BT nhom\TinHieuHuanLuyen'
-FILE_WAV = ['phone_F1.wav', 'phone_M1.wav', 'studio_F1.wav', 'studio_M1.wav']
-FILE_LAB = ['phone_F1.lab', 'phone_M1.lab', 'studio_F1.lab', 'studio_M1.lab']
+FILE_PATH_THHL = 'D:\Documents\XLTHS\BT nhom\TinHieuHuanLuyen'
+FILE_WAV_THHL = ['phone_F1.wav', 'phone_M1.wav', 'studio_F1.wav', 'studio_M1.wav']
+FILE_LAB_THHL = ['phone_F1.lab', 'phone_M1.lab', 'studio_F1.lab', 'studio_M1.lab']
+
+FILE_PATH_THKT = 'D:\Documents\XLTHS\BT nhom\TinHieuKiemThu'
+FILE_WAV_THKT = ['phone_F2.wav', 'phone_M2.wav', 'studio_F2.wav', 'studio_M2.wav']
+FILE_LAB_THKT = ['phone_F2.lab', 'phone_M2.lab', 'studio_F2.lab', 'studio_M2.lab']
 INDEX = 0
 TIME_FRAME = 0.03
 
 def readFileInput(fileName):
     inputFile = []
-    with open(join(FILE_PATH, fileName)) as file:
+    with open(join(FILE_PATH_THHL, fileName)) as file:
         for line in file:
             inputFile.append(line.split())
     for i in range(0, len(inputFile) - 2):
@@ -72,19 +76,19 @@ def getHighestPeak(frame, frequency, f0Range = (70, 450)):
     return np.argmax(temp) + sampleRange[0]
 
 # Tìm F0 của 1 frame
-def getPitch(frame, frequency, threshold = 0.6):
+def getPitch(frame, frequency, threshold = 0.512):
     posOfPeak = getHighestPeak(frame, frequency)
     if frame[posOfPeak] >= threshold:
         return frequency / posOfPeak
     return 0
 
-def getVoicedFrame(framesArray, framesACFArray, frequency, threshold = 0.6):
+def getVoicedFrame(framesArray, framesACFArray, frequency, threshold = 0.512):
     for i in range(len(framesACFArray)):
         posOfPeak = getHighestPeak(framesACFArray[i], frequency)
         if framesACFArray[i][posOfPeak] >= threshold:
             return framesArray[i], framesACFArray[i]
 
-def getUnvoicedFrame(framesArray, framesACFArray, frequency, thresholdV = 0.6, thresholdU = 0.3):
+def getUnvoicedFrame(framesArray, framesACFArray, frequency, thresholdV = 0.512, thresholdU = 0.3):
    for i in range(len(framesACFArray)):
         posOfPeak = getHighestPeak(framesACFArray[i], frequency)
         if framesACFArray[i][posOfPeak] >= thresholdU and framesACFArray[i][posOfPeak] < thresholdV:
@@ -93,20 +97,21 @@ def getUnvoicedFrame(framesArray, framesACFArray, frequency, thresholdV = 0.6, t
 # Main
 # Đọc tín hiệu mẫu
 index = 0
-for i in range(0, len(FILE_WAV)):
-    frequency, signal = read(join(FILE_PATH, FILE_WAV[i]))
+for i in range(0, len(FILE_WAV_THKT)):
+    frequency, signal = read(join(FILE_PATH_THKT, FILE_WAV_THKT[i]))
     print("Frequency : ", frequency)
     print("Signal : ", signal)
 
     frameLength = int(TIME_FRAME * frequency) # Độ dài của 1 frame (đơn vị mẫu)
     framesArray = getFramesArray(signal, frameLength)
     framesACFArray = [ACF(framesArray[i], frameLength) for i in range(len(framesArray))]
-    meanV, stdV, meanU, stdU = findThreshold(framesACFArray, frequency, readFileInput(FILE_LAB[i]))
+    # Tính ngưỡng riêng của từng tín hiệu
+    # meanV, stdV, meanU, stdU = findThreshold(framesACFArray, frequency, readFileInput(FILE_LAB_THHL[i]))
     F0 = np.zeros(len(framesArray))
     timeSample = np.zeros(len(framesArray))
     for i in range(len(framesACFArray)):
-        # F0[i] = getPitch(framesACFArray[i], frequency)
-        F0[i] = getPitch(framesACFArray[i], frequency, meanV)
+        F0[i] = getPitch(framesACFArray[i], frequency)
+        # F0[i] = getPitch(framesACFArray[i], frequency, meanV)
         timeSample[i] = TIME_FRAME * i / 2
 
     F0mean = np.mean([i for i in F0 if i > 0 and i < 450])
@@ -115,17 +120,17 @@ for i in range(0, len(FILE_WAV)):
     # Show
     plt.figure(i)
     plt.subplot(4, 1, 1)
-    plt.title(f"Signal: {FILE_WAV[index]}")
+    plt.title(f"Signal: {FILE_WAV_THKT[index]}")
     index += 1
     plt.plot(signal)
     plt.subplot(4, 1, 2)
     plt.title(f"F0 ACF - F0mean = {F0mean}, F0std = {F0std}")
     plt.ylim([0, 450])
     plt.plot(timeSample, F0, '.')
-    # Voiced, VoicedACF = getVoicedFrame(framesArray, framesACFArray, frequency)
-    # Unvoiced, UnvoicedACF = getUnvoicedFrame(framesArray, framesACFArray, frequency)
-    Voiced, VoicedACF = getVoicedFrame(framesArray, framesACFArray, frequency, meanV)
-    Unvoiced, UnvoicedACF = getUnvoicedFrame(framesArray, framesACFArray, frequency, meanV, meanU)
+    Voiced, VoicedACF = getVoicedFrame(framesArray, framesACFArray, frequency)
+    Unvoiced, UnvoicedACF = getUnvoicedFrame(framesArray, framesACFArray, frequency)
+    # Voiced, VoicedACF = getVoicedFrame(framesArray, framesACFArray, frequency, meanV)
+    # Unvoiced, UnvoicedACF = getUnvoicedFrame(framesArray, framesACFArray, frequency, meanV, meanU)
     plt.subplot(4, 1, 3)
     plt.title("Voiced ACF")
     plt.plot(VoicedACF)
