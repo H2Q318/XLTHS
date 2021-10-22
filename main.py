@@ -117,8 +117,6 @@ for i in range(0, len(FILE_WAV_THKT)):
     plt.plot(timeSample, F0, '.')
     VoicedACF = getVoicedFrame(framesACFArray, frequency, readFileInput(FILE_LAB_THKT[index]))
     UnvoicedACF = getUnvoicedFrame(framesACFArray, frequency, readFileInput(FILE_LAB_THKT[index]))
-    # VoicedACF = [framesACFArray[71], framesACFArray[52], framesACFArray[52], framesACFArray[49]]
-    # UnvoicedACF = [framesACFArray[30], framesACFArray[30], framesACFArray[30], framesACFArray[30]]
     plt.subplot(4, 1, 3)
     plt.title("Voiced ACF")
     # plt.plot(VoicedACF[index])
