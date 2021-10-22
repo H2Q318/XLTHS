@@ -60,7 +60,6 @@ def getVoicedFrame(framesACFArray, frequency, input, threshold = 0.446):
     VoicedFrame = []
     input = input[:-2]
     j = 0 
-    # for i in range(len(framesACFArray)):
     for i in range(len(framesACFArray)):
         posOfPeak = getHighestPeak(framesACFArray[i], frequency)
         if input[j][2] == 'v':
@@ -88,8 +87,8 @@ def getUnvoicedFrame(framesACFArray, frequency, input, thresholdV = 0.446, thres
 index = 0
 for i in range(0, len(FILE_WAV_THKT)):
     frequency, signal = read(join(FILE_PATH_THKT, FILE_WAV_THKT[i]))
-    print("Frequency : ", frequency)
-    print("Signal : ", signal)
+    # print("Frequency : ", frequency)
+    # print("Signal : ", signal)
 
     frameLength = int(TIME_FRAME * frequency) # Độ dài của 1 frame (đơn vị mẫu)
     framesArray = getFramesArray(signal, frameLength)
